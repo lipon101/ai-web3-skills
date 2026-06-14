@@ -1,0 +1,8 @@
+{
+  "name": "argus",
+  "version": "0.3.5",
+  "description": "Rust-first audit pipeline with two modes: smart-contract (Solana Anchor / CosmWasm / Substrate pallets) and infra (DLT infrastructure — validator clients, consensus engines, p2p networking, crypto libraries, storage engines, RPC nodes, bridge relayers, wallets, smart-contract VMs). Maps the codebase, generates findings via 8 parallel attacker angles, builds strong PoCs (Tier-1-live-e2e mandatory in infra mode), runs adversarial validation with severity calibration, applies platform judging logic, enforces the live bounty page, checks the target repo for duplication signals, auto-loops REFINE-bucket findings, and emits only what survived every gate. Optional Stage 9 verifies a fix. Runs on both Claude Code and Codex CLI.",
+  "author": {
+    "name": "Argus contributors"
+  }
+}

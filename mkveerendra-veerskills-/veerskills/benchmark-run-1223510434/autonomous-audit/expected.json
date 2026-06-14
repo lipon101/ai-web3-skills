@@ -1,0 +1,109 @@
+[
+  {
+    "id": "case-001",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "tx_origin_authentication",
+        "affected_function": "batchSend",
+        "severity": "HIGH",
+        "explanation": "batchSend uses tx.origin instead of msg.sender to check operator authorization. A phishing attack can trick a legitimate operator into calling a malicious contract that relays the call to batchSend, passing the tx.origin check and draining the vault's tokens."
+      }
+    ]
+  },
+  {
+    "id": "case-002",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_condition_check",
+        "affected_function": "refund",
+        "severity": "MEDIUM",
+        "explanation": "refund does not verify that the release condition has not yet been met. After the releaseBlock is reached, the depositor can call refund to race the recipient's release() call and reclaim funds that are rightfully the recipient's. Combined with front-running, the depositor can always win this race."
+      }
+    ]
+  },
+  {
+    "id": "case-003",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_input_validation",
+        "affected_function": "createMarket",
+        "severity": "HIGH",
+        "explanation": "discountBps is not capped at 10000, so a market creator can set a 100%+ discount making effectivePrice zero, enabling buyers to drain tokens for free."
+      }
+    ]
+  },
+  {
+    "id": "case-004",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "checks_effects_interactions_violation",
+        "affected_function": "withdrawTo",
+        "severity": "CRITICAL",
+        "explanation": "withdrawTo makes an external call before zeroing deposits[msg.sender] without a reentrancy guard, allowing a malicious recipient to re-enter and drain the vault."
+      }
+    ]
+  },
+  {
+    "id": "case-005",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_access_control",
+        "affected_function": "setRewardPerBlock",
+        "severity": "HIGH",
+        "explanation": "setRewardPerBlock has no access control, allowing any caller to arbitrarily inflate or zero out the reward rate, manipulating yields for all stakers."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "division_by_zero",
+        "affected_function": "_updateRewards",
+        "severity": "HIGH",
+        "explanation": "If totalStaked is zero when _updateRewards is called (e.g., during the first stake call before totalStaked is incremented), the division (stakedBalance * 1e18) / totalStaked will revert, permanently bricking stake()."
+      }
+    ]
+  },
+  {
+    "id": "case-006",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "signature_replay",
+        "affected_function": "executeTransfer",
+        "severity": "CRITICAL",
+        "explanation": "There is no nonce or used-signature tracking. A valid signed transfer can be replayed repeatedly until the signer's token allowance or balance is exhausted."
+      }
+    ]
+  },
+  {
+    "id": "case-007",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "checks_effects_interactions_violation",
+        "affected_function": "buy",
+        "severity": "HIGH",
+        "explanation": "buy sends the ETH refund to msg.sender before updating tokensSold. A malicious buyer can re-enter buy during the refund call with tokensSold still at its pre-purchase value, bypassing the tokensForSale cap and draining all tokens from the auction."
+      }
+    ]
+  },
+  {
+    "id": "case-008",
+    "findings": []
+  },
+  {
+    "id": "case-009",
+    "findings": []
+  },
+  {
+    "id": "case-010",
+    "findings": []
+  },
+  {
+    "id": "case-011",
+    "findings": []
+  }
+]

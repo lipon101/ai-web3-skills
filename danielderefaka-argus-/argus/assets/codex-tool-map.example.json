@@ -1,0 +1,104 @@
+{
+  "schema_version": "1",
+  "platform_detection": {
+    "claude": {
+      "env_marker": "CLAUDE_PROJECT_DIR",
+      "fallback_env": ["CLAUDECODE"]
+    },
+    "codex": {
+      "env_marker": "CODEX_HOME",
+      "fallback_env": ["CODEX_AGENT"]
+    }
+  },
+  "tool_translation": {
+    "AskUserQuestion": {
+      "claude": "native",
+      "codex": {
+        "shim": "prompt_and_wait",
+        "fallback_protocol": "Write the question + numbered options to a markdown file at $RUN_DIR/_pending_question.md; wait for the user to write the answer to $RUN_DIR/_pending_answer.md; read and continue. The Codex orchestrator prompts the user directly via Codex's standard input/output."
+      },
+      "used_at_stages": [0, 8, "8.5 (REFINE-loop)"]
+    },
+    "TodoWrite": {
+      "claude": "native",
+      "codex": {
+        "shim": "markdown_checklist",
+        "fallback_protocol": "Write/update $RUN_DIR/_todos.md with a GitHub-flavored markdown checklist. Use `[x]` for completed, `[ ]` for pending, and `[ ] ← in progress` for the active item. One-active-todo discipline is the orchestrator's responsibility."
+      },
+      "used_at_stages": "all"
+    },
+    "Task": {
+      "claude": "native (subagent dispatch)",
+      "codex": {
+        "shim": "sequential_fallback",
+        "fallback_protocol": "Codex may natively support parallel subagents; if not, run each angle sequentially and record [CODEX-COMPAT: sequential] in every Stage-2 angle verdict file. Sequential runs cost the same in tokens but take longer in wall-clock."
+      },
+      "used_at_stages": [2]
+    },
+    "WebFetch": {
+      "claude": "native",
+      "codex": {
+        "shim": "web_run_or_skip",
+        "fallback_protocol": "If Codex exposes a `web.run` or equivalent web-access tool, use it. If not, record the URL in $RUN_DIR/_unfetched_urls.txt and proceed without the page. Stage 6's bounty-page rules degrade to generic-mode automatically (confidence cap 65)."
+      },
+      "used_at_stages": [4, 6, "7 (dup check)"]
+    },
+    "WebSearch": {
+      "claude": "native",
+      "codex": {
+        "shim": "web_run_or_skip",
+        "fallback_protocol": "Same as WebFetch — use web.run if available, else record query in $RUN_DIR/_unsearched_queries.txt."
+      },
+      "used_at_stages": [4, 6]
+    },
+    "Skill": {
+      "claude": "native (cross-skill invocation)",
+      "codex": {
+        "shim": "auto_load_via_description",
+        "fallback_protocol": "Codex auto-loads skills via description-match. No explicit invocation needed; if the referenced skill exists in $CODEX_HOME/skills/, it loads naturally."
+      },
+      "used_at_stages": []
+    },
+    "Bash": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics on both platforms."},
+      "used_at_stages": "all"
+    },
+    "Read": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics."},
+      "used_at_stages": "all"
+    },
+    "Write": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics."},
+      "used_at_stages": "all"
+    },
+    "Edit": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics."},
+      "used_at_stages": "all"
+    },
+    "Grep": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics; both platforms expose ripgrep-equivalent."},
+      "used_at_stages": "all"
+    },
+    "Glob": {
+      "claude": "native",
+      "codex": {"shim": "native", "fallback_protocol": "Identical semantics."},
+      "used_at_stages": "all"
+    }
+  },
+  "stage_invariants": {
+    "0": {"must_use": ["AskUserQuestion"], "must_write": ["preview.md", "depth-tier.txt"]},
+    "1": {"must_use": ["Bash", "Read", "Write"], "must_write": ["overview.md", "attack-surface.md", "trust-model.md", "entry-points.md", "invariants.md", "hot-zones.md"]},
+    "2": {"must_use": ["Task or sequential fallback"], "must_write": ["F-NN.md files", "leads.md"]},
+    "3": {"must_use": ["Bash", "Write"], "must_write": ["F-NN/verdict.md", "F-NN/harness.rs (where applicable)"]},
+    "4": {"must_use": ["Read", "Write"], "must_write": ["F-NN/verdict.md", "F-NN/judge-pass.md", "F-NN/severity.json"]},
+    "5": {"must_use": ["Read", "Write"], "must_write": ["F-NN/platform-verdict.md"]},
+    "6": {"must_use": ["WebFetch (optional)", "Read", "Write"], "must_write": ["F-NN/program-triage.md"]},
+    "7": {"must_use": ["Bash (gh CLI)", "Read", "Write"], "must_write": ["F-NN/dup-check.md"]},
+    "8": {"must_use": ["AskUserQuestion (for REFINE-loop)", "Read", "Write"], "must_write": ["report.md", "manifest.json"]}
+  }
+}

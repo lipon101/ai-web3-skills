@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "case_id": "case-001",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "tx_origin_authentication",
+          "affected_function": "batchSend",
+          "severity": "HIGH",
+          "explanation": "Uses tx.origin for operator authorization allowing phishing attacks where malicious contracts intermediate calls."
+        }
+      ]
+    },
+    {
+      "case_id": "case-002",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "missing_condition_check",
+          "affected_function": "refund",
+          "severity": "MEDIUM",
+          "explanation": "Missing releaseBlock maturity check that release() has, allowing depositor to race recipient and reclaim funds after maturity."
+        }
+      ]
+    },
+    {
+      "case_id": "case-003",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "missing_input_validation",
+          "affected_function": "createMarket",
+          "severity": "HIGH",
+          "explanation": "discountBps parameter not capped at 10000, allowing market creator to set 100%+ discount and enable free token purchases."
+        }
+      ]
+    },
+    {
+      "case_id": "case-004",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "checks_effects_interactions_violation",
+          "affected_function": "withdrawTo",
+          "severity": "CRITICAL",
+          "explanation": "External call to owner before updating deposits[msg.sender] to zero allows reentrancy attacks to drain the vault."
+        }
+      ]
+    },
+    {
+      "case_id": "case-005",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "missing_access_control",
+          "affected_function": "setRewardPerBlock",
+          "severity": "HIGH",
+          "explanation": "No access control modifier allows any caller to arbitrarily change the reward rate, manipulating yields for all stakers."
+        },
+        {
+          "vulnerable": true,
+          "vulnerability_type": "division_by_zero",
+          "affected_function": "_updateRewards",
+          "severity": "HIGH",
+          "explanation": "If totalStaked is zero when _updateRewards is called during first stake, division by zero will revert and brick the staking functionality."
+        }
+      ]
+    },
+    {
+      "case_id": "case-006",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "signature_replay",
+          "affected_function": "executeTransfer",
+          "severity": "CRITICAL",
+          "explanation": "Missing nonce or used-signature tracking allows valid signed transfers to be replayed repeatedly until signer's allowance is exhausted."
+        }
+      ]
+    },
+    {
+      "case_id": "case-007",
+      "findings": [
+        {
+          "vulnerable": true,
+          "vulnerability_type": "checks_effects_interactions_violation",
+          "affected_function": "buy",
+          "severity": "HIGH",
+          "explanation": "Sending ETH refund to msg.sender before updating tokensSold allows reentrancy to bypass tokensForSale cap and drain all tokens."
+        }
+      ]
+    },
+    {
+      "case_id": "case-008",
+      "findings": []
+    },
+    {
+      "case_id": "case-009",
+      "findings": []
+    },
+    {
+      "case_id": "case-010",
+      "findings": []
+    },
+    {
+      "case_id": "case-011",
+      "findings": []
+    }
+  ]
+}

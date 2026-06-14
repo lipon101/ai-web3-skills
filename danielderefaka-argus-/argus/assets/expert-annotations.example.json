@@ -1,0 +1,59 @@
+{
+  "_comment": "Argus v0.1.10 expert-annotation input. Optional. Drop into assets/expert-annotations.json (without `.example`) to activate. Schema is loose - add fields as needed; Stage 1 reads what's present and ignores unknown keys. Every annotation MUST include human-written reasoning, not just a claim.",
+  "version": "1.0",
+  "applies_to_repo": "<git-url-or-local-path>",
+  "applies_to_commit": "<sha-or-branch>",
+  "annotated_by": "<auditor name or team>",
+  "annotated_at": "<ISO-8601 date>",
+
+  "safe_patterns": [
+    {
+      "id": "pyth-staleness-trusted",
+      "description": "Pyth pull-oracle reads in src/oracle/pyth_reader.rs with our own 60s heartbeat threshold. Do NOT flag staleness as a bug.",
+      "applies_to": "any reference to pyth_reader.rs",
+      "reasoning": "We verified the heartbeat constant is 60 (oracle/pyth_reader.rs:42), the deviation threshold is 0.5% (oracle/pyth_reader.rs:51), and both are gated behind a 24h timelocked admin path. Staleness scenarios were modeled in our own off-chain monitoring."
+    },
+    {
+      "id": "spl-token-canonical-not-token-2022",
+      "description": "All token mints in scope are canonical SPL Token (no Token-2022 extensions). Do NOT flag transfer-fee, transfer-hook, or mint-decimals-mutability concerns.",
+      "applies_to": "any reference to SPL Token CPI",
+      "reasoning": "Mint allowlist enforced at protocol initialization (initialize.rs:88-95) restricts to a hardcoded set of canonical SPL Token mints. Token-2022 extensions are not reachable."
+    }
+  ],
+
+  "trusted_invariants": [
+    {
+      "claim": "validator_set is updated atomically with merkle root in the same tx",
+      "applies_to": "src/bridge/validator_update.rs",
+      "reasoning": "Verified manually 2026-04-15 by [reviewer]; the update path uses a single instruction with both writes. Do not flag race condition between validator set rotation and merkle root update."
+    },
+    {
+      "claim": "PDA seeds for vault accounts always include user_pubkey + vault_id",
+      "applies_to": "src/vault/state.rs",
+      "reasoning": "Anchor `seeds = [b\"vault\", user.key().as_ref(), &vault_id.to_le_bytes()]` and bump-derivation enforced. Account substitution between users is impossible."
+    }
+  ],
+
+  "known_safe_call_patterns": [
+    {
+      "pattern": "info.sender == &state.admin",
+      "reasoning": "Already enforced upstream by the admin-router contract at <repo>/admin_router/src/lib.rs:42. Findings about missing admin check downstream are FPs."
+    }
+  ],
+
+  "scope_clarifications": [
+    {
+      "module": "src/legacy/v1_compat/",
+      "status": "deprecated, no funds in flight, kept for historical reads only",
+      "reasoning": "Confirmed via on-chain query that all v1 vaults closed by 2026-02-01. Findings here have severity ≤ Informational regardless of mechanism."
+    }
+  ],
+
+  "_usage_notes": [
+    "Stage 1 reads this file at run start IF present.",
+    "Annotations are injected into ALL Stage 2 angle prompts as: 'SAFE_PATTERNS - do not flag findings matching these UNLESS the annotation itself appears wrong.'",
+    "An angle that produces a finding matching a safe_patterns entry MUST output a `safe_pattern_override` field in the FINDING block justifying why the annotation is wrong. Otherwise the finding is suppressed at Stage 2 dedup.",
+    "Stage 4 ignores expert annotations - they are Stage 2 input only. Stage 4's job is independent adversarial review, not annotation enforcement.",
+    "If you delete this file, Argus runs without expert input - default behavior."
+  ]
+}

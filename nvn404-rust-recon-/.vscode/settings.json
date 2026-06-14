@@ -1,0 +1,8 @@
+{
+  "copilot.skills": {
+    "rust-recon": "./.claude/rust-recon/SKILL.md"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

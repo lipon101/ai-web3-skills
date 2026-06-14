@@ -1,0 +1,4 @@
+interface:
+  display_name: "Argus — Rust-first submission-grade audit"
+  short_description: "End-to-end Rust audit: 8 attacker angles → PoC gate → adversarial review with severity calibration → platform + program scope → duplication probe → submission-grade output."
+  default_prompt: "Use $argus to run an end-to-end Rust audit on the current target. Collect the bounty URL and target GitHub repo URL up front, then proceed through all 8 stages without interruption (plus the Cantina manual-validation acknowledgment gate at Stage 5 if applicable)."
